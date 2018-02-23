@@ -180,7 +180,7 @@ namespace SimplyAPOS
                         abu[i, j].Click += new System.EventHandler(this.AButtonClicked);
                         //increase the sum of items
                         itemsCount++;
-
+                        //test
                     }
                     //nextPosY increasing by button's height and the stepper
                     nextPosY += (defHeight + stepper);
