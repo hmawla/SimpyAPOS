@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Configuration;
+using System.Data.OleDb;
 
 namespace SimplyAPOS
 {
@@ -18,6 +21,10 @@ namespace SimplyAPOS
         //Will work with multithreading for better performance later
         Thread th;
 
+        //Declare the OleDb shits, needs a connection to get to the db file, and needs a reader to access its records
+        public OleDbConnection oLEConnection = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=|DataDirectory|/SPOSDB.accdb");
+        public OleDbDataReader theReader = null;
+
         public Main()
         {
             InitializeComponent();
@@ -25,9 +32,39 @@ namespace SimplyAPOS
 
         //This method just fucked me up but I finally nailed it (Mostly :P)
         //Planning to add multithreading later for better performance
-        public void fillButtons(int numOfItems, SPOSDBDataSet.ItemsDataTable theTable)
+        public void FillButtons(Int32 theCatID, SPOSDBDataSet.ItemsDataTable theTable)
         {
-            MessageBox.Show("" + theTable.Count + " ");
+            //needed to determine the number of items, (may get ommitted later for memory purposes)
+            int numOfItems = 0;
+            
+
+            //OleDb commands needed to send queries via OleDbConnection
+            OleDbCommand theCmd = new OleDbCommand
+            {
+                CommandText = "SELECT COUNT(*) FROM Items WHERE CatID = " + theCatID,
+                CommandType = CommandType.Text,
+                CommandTimeout = 2,
+                Connection = oLEConnection
+            };
+            OleDbCommand theCmd2 = new OleDbCommand
+            {
+                CommandText = "SELECT ItemID, ItemName FROM Items where CatID = " + theCatID,
+                CommandType = CommandType.Text,
+                CommandTimeout = 2,
+                Connection = oLEConnection
+            };
+
+            try
+            {
+                //This will return the first value in first column and colses the reader by it self
+                //numOfItems may not get ommitted after all
+                numOfItems = (int)theCmd.ExecuteScalar();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("" + ex);
+            }
+            
             //This will clean the buttons in order to rearrange them, maybe needs a better coding will think of a better way later
             //Added try since at first the array will be empty so that it does not send an error, so this is normal, will check what the catch do later
             try
@@ -47,7 +84,9 @@ namespace SimplyAPOS
                     }
                 }
             }
-            catch { }
+            catch(Exception ex) {
+                MessageBox.Show("" + ex);
+            }
             
             //Stepepr is actually my fav variable :P
             //It represents the spacing between each button, did not try changin the value to check if it will work with other values
@@ -87,13 +126,29 @@ namespace SimplyAPOS
             {
                 //declare the array of buttons objects with the first dimension being the rowCount and the second dimension columnCount
                 abu = new Button[(int)rowCount, columnCount];
+                
 
+                try
+                {
+                    //This is where most of the db magic happens, this makes a link to the db using the query in theCmd2
+                    //Needs a .Read() to get to the first and next elements
+                    theReader = theCmd2.ExecuteReader();
+
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show("" + ex);
+                }
                 //start showing the buttons
                 for (int i = 0; i < rowCount; i++)
                 {
+                    
+
                     //show buttons for each row
                     for (int j = 0; j < columnCount && itemsCount != numOfItems; j++)
                     {
+                        theReader.Read();
+
                         //give the new button its characteristics
                         //location is calculated according to a variable stepper which is the distance between each button
                         //and a nextPos(X/Y) with nextPosX is the X position of the button
@@ -104,21 +159,25 @@ namespace SimplyAPOS
                             Location = new Point(nextPosX, nextPosY),
                             Size = new Size(defWidth, defHeight),
                             Font = new Font("Montserrat", 11.25f, FontStyle.Bold),
-
+                            //This one will contain the ID of the Item, needed a lot to access the ID of the Item from the button
+                            Name = "" + theReader.GetInt32(0),
                             FlatStyle = FlatStyle.Flat,
-                            BackColor = ChosenColor
+                            BackColor = ChosenColor,
+                            //Gets the name of the Item
+                            Text = theReader.GetString(1)
+                            
 
 
 
                         };
+                        
                         //could not be used inside the button's characteristics had to use it outside, not sure why yet
                         abu[i, j].FlatAppearance.BorderSize = 0;
-                        //could not take .location property inside button's characteristics somehow
-                        abu[i, j].Text = "" + theTable.ElementAt(itemsCount).ItemName;
                         //nextPosX increasing by button's width and the stepper
                         nextPosX += (defWidth + stepper);
                         //add the charactirized button
                         tab_buy.Controls.Add(abu[i, j]);
+                        abu[i, j].Click += new System.EventHandler(this.AButtonClicked);
                         //increase the sum of items
                         itemsCount++;
 
@@ -141,49 +200,86 @@ namespace SimplyAPOS
 
                 }
             }
-            //still learning what to do inside catch to get better error reporting
-            catch
+            //Used for error reporting
+            catch(Exception ex)
             {
-
+                MessageBox.Show("" + ex);
             }
             
 
         }
 
+        //Currently working on this, it took me a while to figure it out, and FINALLY!!
+        private void AButtonClicked(Object sender, EventArgs e)
+        {
+            Button theClickedButton = (Button)sender;
+
+        }
+
         private void Main_Load(object sender, EventArgs e)
         {
+            // TODO: This line of code loads data into the 'sPOSDBDataSet.Category' table. You can move, or remove it, as needed.
+            this.categoryTableAdapter.Fill(this.sPOSDBDataSet.Category);
+
             // TODO: This line of code loads data into the 'sPOSDBDataSet.Items' table. You can move, or remove it, as needed.
             this.itemsTableAdapter.Fill(this.sPOSDBDataSet.Items);
-            fillButtons(sPOSDBDataSet.Items.Rows.Count, sPOSDBDataSet.Items);
+
+
+            
+            oLEConnection.Open();
+
+            // Data is accessible through the DataReader object here.
+            //FillButtons("this", sPOSDBDataSet.Items);
+            FillButtons(1, sPOSDBDataSet.Items);
+            FillCategories(sPOSDBDataSet.Category);
+            
+
+           
+        }
+
+        private void Main_Closed(object sender, EventArgs e)
+        {
+            oLEConnection.Close();
+        }
+
+        public void FillCategories(SPOSDBDataSet.CategoryDataTable theTable)
+        {
+            for (int i = 0 ; i < theTable.Count ; i++)
+            {
+                CBox_Cat.Items.Add(theTable.Rows[i][1]);
+            }
+            CBox_Cat.SelectedIndex = 0 ;
         }
 
         private void Main_ResizeEnd(object sender, EventArgs e)
         {
-            fillButtons(sPOSDBDataSet.Items.Rows.Count, sPOSDBDataSet.Items);
+            FillButtons(1, sPOSDBDataSet.Items);
         }
         private void Main_Resized(object sender, EventArgs e)
         {
             if (WindowState == FormWindowState.Maximized)
             {
-                fillButtons(sPOSDBDataSet.Items.Rows.Count, sPOSDBDataSet.Items);
+                FillButtons(1, sPOSDBDataSet.Items);
             }
         }
 
-        private void tab_sell_Click(object sender, EventArgs e)
+        private void Tab_sell_Click(object sender, EventArgs e)
         {
 
         }
 
-        private void materialRaisedButton2_Click(object sender, EventArgs e)
-        {
-            WindowState = FormWindowState.Maximized;
-        }
 
-        private void materialRaisedButton1_Click(object sender, EventArgs e)
-        {
-            WindowState = FormWindowState.Normal;
+        //This is a work in progress
+        //private void MaterialRaisedButton2_Click(object sender, EventArgs e)
+        //{
+        //    WindowState = FormWindowState.Maximized;
+        //}
+
+        //private void MaterialRaisedButton1_Click(object sender, EventArgs e)
+        //{
+        //    WindowState = FormWindowState.Normal;
                 
-        }
+        //}
         
     }
 }

@@ -34,18 +34,21 @@
             this.tab_buy = new System.Windows.Forms.TabPage();
             this.materialTabSelector1 = new MaterialSkin.Controls.MaterialTabSelector();
             this.lbl_cat = new MaterialSkin.Controls.MaterialLabel();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.CBox_Cat = new System.Windows.Forms.ComboBox();
+            this.categoryBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.DBBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.sPOSDBDataSet = new SimplyAPOS.SPOSDBDataSet();
             this.materialSingleLineTextField1 = new MaterialSkin.Controls.MaterialSingleLineTextField();
             this.materialLabel1 = new MaterialSkin.Controls.MaterialLabel();
             this.materialLabel2 = new MaterialSkin.Controls.MaterialLabel();
             this.materialSingleLineTextField2 = new MaterialSkin.Controls.MaterialSingleLineTextField();
             this.materialRaisedButton1 = new MaterialSkin.Controls.MaterialRaisedButton();
             this.materialRaisedButton2 = new MaterialSkin.Controls.MaterialRaisedButton();
-            this.DBBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.sPOSDBDataSet = new SimplyAPOS.SPOSDBDataSet();
             this.itemsBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.itemsTableAdapter = new SimplyAPOS.SPOSDBDataSetTableAdapters.ItemsTableAdapter();
+            this.categoryTableAdapter = new SimplyAPOS.SPOSDBDataSetTableAdapters.CategoryTableAdapter();
             this.tbc_main.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.categoryBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.DBBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.sPOSDBDataSet)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.itemsBindingSource)).BeginInit();
@@ -75,7 +78,7 @@
             this.tab_sell.TabIndex = 0;
             this.tab_sell.Text = "SELL";
             this.tab_sell.UseVisualStyleBackColor = true;
-            this.tab_sell.Click += new System.EventHandler(this.tab_sell_Click);
+            this.tab_sell.Click += new System.EventHandler(this.Tab_sell_Click);
             // 
             // tab_buy
             // 
@@ -116,14 +119,30 @@
             this.lbl_cat.TabIndex = 0;
             this.lbl_cat.Text = "Category:";
             // 
-            // comboBox1
+            // CBox_Cat
             // 
-            this.comboBox1.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(598, 161);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(161, 21);
-            this.comboBox1.TabIndex = 1;
+            this.CBox_Cat.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.CBox_Cat.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.CBox_Cat.FormattingEnabled = true;
+            this.CBox_Cat.Location = new System.Drawing.Point(598, 161);
+            this.CBox_Cat.Name = "CBox_Cat";
+            this.CBox_Cat.Size = new System.Drawing.Size(161, 21);
+            this.CBox_Cat.TabIndex = 1;
+            // 
+            // categoryBindingSource
+            // 
+            this.categoryBindingSource.DataMember = "Category";
+            this.categoryBindingSource.DataSource = this.DBBindingSource;
+            // 
+            // DBBindingSource
+            // 
+            this.DBBindingSource.DataSource = this.sPOSDBDataSet;
+            this.DBBindingSource.Position = 0;
+            // 
+            // sPOSDBDataSet
+            // 
+            this.sPOSDBDataSet.DataSetName = "SPOSDBDataSet";
+            this.sPOSDBDataSet.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
             // 
             // materialSingleLineTextField1
             // 
@@ -206,7 +225,7 @@
             this.materialRaisedButton1.TabIndex = 6;
             this.materialRaisedButton1.Text = "INVOICE INFO >";
             this.materialRaisedButton1.UseVisualStyleBackColor = true;
-            this.materialRaisedButton1.Click += new System.EventHandler(this.materialRaisedButton1_Click);
+            this.materialRaisedButton1.Click += new System.EventHandler(this.MaterialRaisedButton1_Click);
             // 
             // materialRaisedButton2
             // 
@@ -223,17 +242,7 @@
             this.materialRaisedButton2.TabIndex = 7;
             this.materialRaisedButton2.Text = "Submit";
             this.materialRaisedButton2.UseVisualStyleBackColor = true;
-            this.materialRaisedButton2.Click += new System.EventHandler(this.materialRaisedButton2_Click);
-            // 
-            // DBBindingSource
-            // 
-            this.DBBindingSource.DataSource = this.sPOSDBDataSet;
-            this.DBBindingSource.Position = 0;
-            // 
-            // sPOSDBDataSet
-            // 
-            this.sPOSDBDataSet.DataSetName = "SPOSDBDataSet";
-            this.sPOSDBDataSet.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
+            this.materialRaisedButton2.Click += new System.EventHandler(this.MaterialRaisedButton2_Click);
             // 
             // itemsBindingSource
             // 
@@ -243,6 +252,10 @@
             // itemsTableAdapter
             // 
             this.itemsTableAdapter.ClearBeforeFill = true;
+            // 
+            // categoryTableAdapter
+            // 
+            this.categoryTableAdapter.ClearBeforeFill = true;
             // 
             // Main
             // 
@@ -256,16 +269,18 @@
             this.Controls.Add(this.materialSingleLineTextField2);
             this.Controls.Add(this.materialLabel1);
             this.Controls.Add(this.materialSingleLineTextField1);
-            this.Controls.Add(this.comboBox1);
+            this.Controls.Add(this.CBox_Cat);
             this.Controls.Add(this.lbl_cat);
             this.Controls.Add(this.materialTabSelector1);
             this.Controls.Add(this.tbc_main);
             this.Name = "Main";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Main_Load);
+            this.Closed += new System.EventHandler(this.Main_Closed);
             this.ResizeEnd += new System.EventHandler(this.Main_ResizeEnd);
             this.Resize += new System.EventHandler(this.Main_Resized);
             this.tbc_main.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.categoryBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.DBBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.sPOSDBDataSet)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.itemsBindingSource)).EndInit();
@@ -281,7 +296,7 @@
         private System.Windows.Forms.TabPage tab_buy;
         private MaterialSkin.Controls.MaterialTabSelector materialTabSelector1;
         private MaterialSkin.Controls.MaterialLabel lbl_cat;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ComboBox CBox_Cat;
         private MaterialSkin.Controls.MaterialSingleLineTextField materialSingleLineTextField1;
         private MaterialSkin.Controls.MaterialLabel materialLabel1;
         private MaterialSkin.Controls.MaterialLabel materialLabel2;
@@ -292,6 +307,8 @@
         private SPOSDBDataSet sPOSDBDataSet;
         private System.Windows.Forms.BindingSource itemsBindingSource;
         private SPOSDBDataSetTableAdapters.ItemsTableAdapter itemsTableAdapter;
+        private System.Windows.Forms.BindingSource categoryBindingSource;
+        private SPOSDBDataSetTableAdapters.CategoryTableAdapter categoryTableAdapter;
     }
 }
 
