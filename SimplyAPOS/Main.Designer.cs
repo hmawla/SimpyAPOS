@@ -225,7 +225,6 @@
             this.materialRaisedButton1.TabIndex = 6;
             this.materialRaisedButton1.Text = "INVOICE INFO >";
             this.materialRaisedButton1.UseVisualStyleBackColor = true;
-            this.materialRaisedButton1.Click += new System.EventHandler(this.MaterialRaisedButton1_Click);
             // 
             // materialRaisedButton2
             // 
@@ -242,7 +241,6 @@
             this.materialRaisedButton2.TabIndex = 7;
             this.materialRaisedButton2.Text = "Submit";
             this.materialRaisedButton2.UseVisualStyleBackColor = true;
-            this.materialRaisedButton2.Click += new System.EventHandler(this.MaterialRaisedButton2_Click);
             // 
             // itemsBindingSource
             // 
@@ -275,8 +273,8 @@
             this.Controls.Add(this.tbc_main);
             this.Name = "Main";
             this.Text = "Form1";
-            this.Load += new System.EventHandler(this.Main_Load);
             this.Closed += new System.EventHandler(this.Main_Closed);
+            this.Load += new System.EventHandler(this.Main_Load);
             this.ResizeEnd += new System.EventHandler(this.Main_ResizeEnd);
             this.Resize += new System.EventHandler(this.Main_Resized);
             this.tbc_main.ResumeLayout(false);

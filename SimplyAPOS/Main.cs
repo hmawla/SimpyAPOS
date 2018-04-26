@@ -85,7 +85,6 @@ namespace SimplyAPOS
                 }
             }
             catch(Exception ex) {
-                MessageBox.Show("" + ex);
             }
             
             //Stepepr is actually my fav variable :P
@@ -164,7 +163,7 @@ namespace SimplyAPOS
                             FlatStyle = FlatStyle.Flat,
                             BackColor = ChosenColor,
                             //Gets the name of the Item
-                            Text = theReader.GetString(1)
+                            Text =  theReader.GetString(1)
                             
 
 
@@ -180,7 +179,6 @@ namespace SimplyAPOS
                         abu[i, j].Click += new System.EventHandler(this.AButtonClicked);
                         //increase the sum of items
                         itemsCount++;
-                        //test
                     }
                     //nextPosY increasing by button's height and the stepper
                     nextPosY += (defHeight + stepper);
@@ -278,8 +276,8 @@ namespace SimplyAPOS
         //private void MaterialRaisedButton1_Click(object sender, EventArgs e)
         //{
         //    WindowState = FormWindowState.Normal;
-                
+
         //}
-        
+
     }
 }
